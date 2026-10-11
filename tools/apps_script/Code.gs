@@ -10,7 +10,7 @@
 
 // ---------------------------------------------------------------- 설정
 // Pico 의 credentials.py 에 있는 주소 끝의 token 과 같아야 함. 아무도 모르는 긴 문자열로.
-const TOKEN = 'QQtIT-iI-Mk8oTDp4ruk8ORY';
+const TOKEN = 'UmzEVQOnhqRM5yX463o7jpuDsBAil0b2vNP9Kt8F';
 
 // 가져올 캘린더. 'primary' = 내 기본 캘린더.
 // 다른 캘린더는 구글 캘린더 → 설정 → 해당 캘린더 → "캘린더 통합" → 캘린더 ID 를 넣으면 됨.
