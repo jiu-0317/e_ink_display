@@ -17,6 +17,8 @@ FALLBACK_NOW = (2026, 10, 10, 12, 0, 0)
 FAKE_NOW = None
 
 TZ_OFFSET = 9 * 3600        # 한국 시간 = UTC + 9
+RTC_IS_UTC = True           # Pico 시계(RTC)는 UTC 로 맞춰 둠 (NTP/구글 응답). PC 도구가 한국 시각으로
+                            # 맞춰 주는 환경(Thonny 등)에서 시험할 때만 False
 
 # ---- 일정 데이터
 CACHE_PATH = "data/events.json"         # 구글 캘린더에서 받아 저장해 둔 일정
@@ -25,6 +27,8 @@ MOCK_PATH = "data/mock_events.json"     # credentials.py 를 아직 안 채웠�
 # ---- 동기화 (credentials.py 를 채우면 동작)
 SYNC_MIN = 30               # 구글 캘린더를 다시 받아오는 간격 (분)
 SYNC_RETRY_MIN = 5          # 실패했을 때 다시 시도할 때까지 (분)
+HTTP_TIMEOUT_S = 45         # Apps Script 응답을 기다리는 시간 (오래 안 쓰면 첫 응답이 느림)
+HTTP_TRIES = 2              # 한 번의 동기화에서 일정 받기 시도 횟수
 
 # ---- 화면 갱신 주기 (시계 기준 10분 단위: :00 :10 :20 ... 에 맞춰 갱신)
 TODAY_TICK_MIN = 10         # 오늘 화면: 10분마다 (지금 선 이동)

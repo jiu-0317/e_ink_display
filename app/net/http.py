@@ -24,16 +24,20 @@ def get_to_file(url, path, timeout=20, max_redirects=5):
         ai = socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM)[0]
         s = socket.socket(ai[0], ai[1], ai[2])
         s.settimeout(timeout)
+        stage = "연결"
         try:
             s.connect(ai[-1])
             if proto == "https":
+                stage = "TLS"
                 ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
                 ctx.verify_mode = ssl.CERT_NONE
                 s = ctx.wrap_socket(s, server_hostname=host)
+            stage = "요청 보내기"
             req = ("GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: epaper-calendar\r\n"
                    "Connection: close\r\n\r\n") % (rpath, host)
             s.write(req.encode())
 
+            stage = "응답 기다리기"
             status_line = s.readline()
             parts = status_line.split(None, 2)
             if len(parts) < 2:
@@ -59,6 +63,7 @@ def get_to_file(url, path, timeout=20, max_redirects=5):
             if status != 200:
                 raise OSError("HTTP %d" % status)
 
+            stage = "본문 받기"
             n = 0
             buf = bytearray(1024)
             mv = memoryview(buf)
@@ -84,6 +89,8 @@ def get_to_file(url, path, timeout=20, max_redirects=5):
                         f.write(mv[:k])
                         n += k
             return n
+        except OSError as e:
+            raise OSError("%s (%s 중, %s)" % (e, stage, host))
         finally:
             s.close()
     raise OSError("리디렉션이 너무 많음")

@@ -45,7 +45,16 @@ def run(cred):
             except Exception as e:
                 print("  NTP 실패 (응답의 시각으로 대신):", e)
         t1 = utime.ticks_ms()
-        n = http.get_to_file(cred.CALENDAR_URL, tmp)
+        tries = getattr(config, "HTTP_TRIES", 2)
+        for k in range(tries):
+            try:
+                n = http.get_to_file(cred.CALENDAR_URL, tmp, timeout=getattr(config, "HTTP_TIMEOUT_S", 45))
+                break
+            except OSError as e:
+                if k == tries - 1:
+                    raise
+                print("  일정 받기 실패, 다시 시도:", e)
+                gc.collect()
         print("  일정 받음: %d bytes, %d ms" % (n, utime.ticks_diff(utime.ticks_ms(), t1)))
     finally:
         wifi.off(wlan)
