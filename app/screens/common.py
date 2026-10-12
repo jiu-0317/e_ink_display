@@ -17,9 +17,10 @@ class Ctx:
         self.today = now[:3]
         self.today_ord = cal.to_ord(*self.today)
         self.now_min = model.minute_of(now)
+        self.now_min10 = self.now_min - self.now_min % 10   # 화면에 보이는 시각은 10분 단위
 
     def clock(self):
         """헤더 오른쪽 글자: 화면을 그린 시각 (+ 상태)."""
-        t = "%02d:%02d" % (self.now[3], self.now[4]) if self.valid else "시간 미설정"
+        t = "%02d:%02d" % (self.now[3], self.now[4] - self.now[4] % 10) if self.valid else "시간 미설정"
         return (self.status + " · " + t) if self.status else t
 

@@ -19,16 +19,25 @@ def _read(path):
         return None
 
 
+def networks(cred):
+    """credentials.py 의 Wi-Fi 목록. WIFI_NETWORKS 가 있으면 그것, 없으면 WIFI_SSID 하나."""
+    nets = [(n[0], n[1]) for n in getattr(cred, "WIFI_NETWORKS", ()) if n and n[0]]
+    ssid = getattr(cred, "WIFI_SSID", "")
+    if ssid and ssid not in [n[0] for n in nets]:
+        nets.append((ssid, getattr(cred, "WIFI_PASSWORD", "")))
+    return nets
+
+
 def run(cred):
     """(changed, 일정 수) 반환. 실패하면 예외."""
     from net import wifi, http          # network 모듈은 여기서만 (PC 미리보기에는 없음)
     gc.collect()
     tmp = config.CACHE_PATH + ".tmp"
     t0 = utime.ticks_ms()
-    wlan = wifi.connect(cred.WIFI_SSID, cred.WIFI_PASSWORD)
+    wlan, ssid = wifi.connect_any(networks(cred))
     try:
-        print("  Wi-Fi 연결: %d ms, IP %s" % (utime.ticks_diff(utime.ticks_ms(), t0),
-                                            wlan.ifconfig()[0]))
+        print("  Wi-Fi 연결: %s, %d ms, IP %s" % (ssid, utime.ticks_diff(utime.ticks_ms(), t0),
+                                                wlan.ifconfig()[0]))
         if not timesync.synced:
             try:
                 timesync.ntp()

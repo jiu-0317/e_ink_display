@@ -120,6 +120,13 @@ def invert_box(fb, x, y, w, h):
     fb.fill_rect(x, y, w, h, BLACK)
 
 
+def invert_rect(fb, x, y, w, h):
+    """영역의 흑백을 뒤집음 — 흰 바탕에서는 검게, 검은 블록 위에서는 희게 보이는 선."""
+    for yy in range(y, y + h):
+        for xx in range(x, x + w):
+            fb.pixel(xx, yy, 1 - fb.pixel(xx, yy))
+
+
 def dashed_hline(fb, x, y, w, on=4, off=4, color=BLACK):
     i = 0
     while i < w:

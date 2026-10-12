@@ -25,7 +25,17 @@ MOCK_PATH = "data/mock_events.json"     # credentials.py 를 아직 안 채웠�
 # ---- 동기화 (credentials.py 를 채우면 동작)
 SYNC_MIN = 30               # 구글 캘린더를 다시 받아오는 간격 (분)
 SYNC_RETRY_MIN = 5          # 실패했을 때 다시 시도할 때까지 (분)
-REDRAW_MIN = 30             # 데이터가 그대로여도 이 간격으로 다시 그림 ("지금"·취소선 갱신)
+
+# ---- 화면 갱신 주기 (시계 기준 10분 단위: :00 :10 :20 ... 에 맞춰 갱신)
+TODAY_TICK_MIN = 10         # 오늘 화면: 10분마다 (지금 선 이동)
+OTHER_TICK_MIN = 30         # 월간/주간: 30분마다 (:00, :30)
+TODAY_TICK_PARTIAL = True   # 오늘 화면 10분 갱신을 부분 갱신(깜빡임 없음)으로. 이상하면 False → fast
+PARTIALS_BEFORE_FULL = 5    # 부분 갱신 5번(50분)마다 한 번은 full 로 잔상 제거 (Waveshare FAQ 기준)
+
+# ---- 오늘 화면
+TODAY_STYLE = "timeline"    # "timeline" = 시간표 (KEY1 = 다음 날), "list" = 예전 목록 (KEY1 = 다음 페이지)
+TL_START_H = 7              # 시간표 시작 시각
+TL_END_H = 24               # 시간표 끝 시각
 
 # ---- 메인 루프
 LOOP_MS = 20                # 버튼 확인 주기

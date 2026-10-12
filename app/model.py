@@ -81,5 +81,32 @@ def by_day(events, ord_from, ord_to):
     return idx       # load() 에서 정렬해 두었으므로 날짜별 목록도 정렬된 상태
 
 
+def layout_columns(items):
+    """겹치는 일정을 나란히 놓기 (구글 캘린더 방식).
+    items: [(시작, 끝, 무엇), ...] 시작 순 정렬. 끝은 화면에 보이는 끝(최소 높이 반영).
+    반환: [(시작, 끝, 무엇, 열 번호, 그 묶음의 열 수), ...]"""
+    out = []
+    group = []
+    col_end = []            # 열마다 마지막 일정의 끝
+    group_end = -1
+    for s, e, x in items:
+        if group and s >= group_end:          # 앞 묶음과 안 겹침 → 묶음 마감
+            n = len(col_end)
+            out.extend(g + (n,) for g in group)
+            group, col_end, group_end = [], [], -1
+        for c in range(len(col_end)):
+            if col_end[c] <= s:
+                col_end[c] = e
+                break
+        else:
+            c = len(col_end)
+            col_end.append(e)
+        group.append((s, e, x, c))
+        group_end = max(group_end, e)
+    n = len(col_end)
+    out.extend(g + (n,) for g in group)
+    return out
+
+
 def on_day(events, o):
     return by_day(events, o, o + 1).get(o, [])

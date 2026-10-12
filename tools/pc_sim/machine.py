@@ -14,13 +14,24 @@ class KeyScript:
     def __init__(self, spec):
         self.events = []
         for tok in [t.strip() for t in spec.split(",") if t.strip()]:
-            self.events.append((tok[0], 1500 if tok.upper().endswith("L") else 120))
+            if tok[0] == "w":
+                self.events.append(("w", int(tok[1:])))
+            else:
+                self.events.append((tok[0], 1500 if tok.upper().endswith("L") else 120))
         self.start = None
 
     def level(self, key):
         if not self.events:
             raise SystemExit("[PREVIEW] 키 순서를 모두 사용해서 종료")
         k, dur = self.events[0]
+        if k == "w":                         # 대기: "w60000" = 60초 동안 아무것도 안 누름
+            now = utime.ticks_ms()
+            if self.start is None:
+                self.start = now
+            elif now - self.start >= dur:
+                self.events.pop(0)
+                self.start = None
+            return 1
         if k != key:
             return 1
         now = utime.ticks_ms()

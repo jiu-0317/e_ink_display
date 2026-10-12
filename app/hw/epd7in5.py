@@ -114,6 +114,27 @@ class EPD_7in5:
         self.send_frame(Image)
         self.TurnOnDisplay()
 
+    def display_partial_full(self, Image):
+        """화면 전체를 부분 갱신 (깜빡임 없음, 약 0.4초). init_part() 다음에 부른다.
+        deep sleep 을 거쳐도 비교 기준이 맞도록, 직전 화면(buffer_inv 에 남아 있음)을
+        '이전 데이터'(0x10)로 먼저 보내고 새 화면을 0x13 으로 보낸다."""
+        self.send_command(0x50)
+        self.send_data(0xA9)
+        self.send_data(0x07)
+        self.send_command(0x91)              # partial in
+        self.send_command(0x90)              # 창 = 화면 전체
+        for v in (0, 0, (self.width - 1) >> 8, (self.width - 1) & 0xFF,
+                  0, 0, (self.height - 1) >> 8, (self.height - 1) & 0xFF, 0x01):
+            self.send_data(v)
+        self.send_command(0x10)
+        self._write_buf(self.buffer_inv)     # 직전 화면
+        _invert(Image, self.buffer_inv, len(Image))
+        self.send_command(0x13)
+        self._write_buf(self.buffer_inv)     # 새 화면
+        self.send_command(0x12)
+        self.delay_ms(100)
+        self.WaitUntilIdle()
+
     def send_frame_slow(self, Image):
         """원래 display()의 전송 부분만 (비교 측정용, 갱신 안 함)."""
         high = self.height

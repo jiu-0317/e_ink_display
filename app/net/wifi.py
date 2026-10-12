@@ -36,6 +36,50 @@ def connect(ssid, password, timeout_ms=20000):
     return wlan
 
 
+def _scan():
+    """주변에 보이는 SSID -> 신호세기(dBm). 실패하면 None."""
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    try:
+        seen = {}
+        for ap in wlan.scan():
+            try:
+                name = ap[0].decode()
+            except Exception:
+                continue
+            if name and (name not in seen or ap[3] > seen[name]):
+                seen[name] = ap[3]
+        return seen
+    except Exception as e:
+        print("  Wi-Fi 스캔 실패 (목록 전부 시도):", e)
+        return None
+
+
+def connect_any(networks, timeout_ms=15000):
+    """[(ssid, password), ...] 를 앞에서부터 차례로 시도. (wlan, ssid) 반환.
+
+    먼저 주변을 스캔해서 보이는 것만 시도한다 (안 보이는 곳에서 시간 낭비 X).
+    순서는 목록에 적은 순서 = 우선순위.
+    """
+    seen = _scan()
+    todo = [n for n in networks if seen is None or n[0] in seen]
+    if not todo:
+        raise OSError("등록된 Wi-Fi 가 주변에 없음 (보이는 것: %s)"
+                      % ", ".join(sorted(seen)) if seen else "등록된 Wi-Fi 가 주변에 없음")
+    errors = []
+    for ssid, password in todo:
+        try:
+            if seen:
+                print("  Wi-Fi 시도: %s (%d dBm)" % (ssid, seen[ssid]))
+            else:
+                print("  Wi-Fi 시도: %s" % ssid)
+            return connect(ssid, password, timeout_ms), ssid
+        except OSError as e:
+            print("    실패:", e)
+            errors.append("%s: %s" % (ssid, e))
+    raise OSError("모든 Wi-Fi 실패 (" + " / ".join(errors) + ")")
+
+
 def off(wlan):
     try:
         wlan.disconnect()
