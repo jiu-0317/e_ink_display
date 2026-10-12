@@ -2,3 +2,6 @@
 /.vscode
 /app/credentials.py
 /tools/apps_script/Code.gs
+# Python 캐시
+__pycache__/
+*.pyc
